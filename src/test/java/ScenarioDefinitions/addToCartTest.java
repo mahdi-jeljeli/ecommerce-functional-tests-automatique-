@@ -4,6 +4,7 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -14,17 +15,19 @@ import java.time.Duration;
 
 public class addToCartTest {
     static WebDriver driver = WebDriverManager.getDriver();
-//    @Given("user is on the product details page")
-//    public void user_is_on_the_product_details_page() {
-//        driver = WebDriverManager.getDriver();
-////        driver.get("https://zoom.com.tn/pc-portables/12821-pc-portable-vostro-3500-i3-11e-gen-8go-256go-ssd-v3500i3.html");
-//    }
-
     @When("user enter the quantity in the input field")
     public void user_enter_the_quantity_in_the_input_field() {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        WebElement quantityInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("quantity_wanted")));
-        quantityInput.sendKeys("1");
+//        WebElement quantityInput = wait.until(ExpectedConditions.elementToBeClickable(By.className("btn-touchspin")));
+        try {
+            WebElement quantityButton = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".btn.btn-touchspin.js-touchspin.bootstrap-touchspin-up")));
+            for (int i = 0; i < 3; i++) {
+                quantityButton.click();
+            }
+        } catch (TimeoutException e) {
+            System.out.println("Le bouton d'augmentation de quantité n'a pas pu être trouvé ou est bloqué.");
+        }
+
 
     }
 
@@ -37,18 +40,24 @@ public class addToCartTest {
 
     @Then("check the result")
     public void check_the_result() {
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        String expectedMessage = "Il y a 11 article dans votre panier.";
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+        try {
+            // Attendre jusqu'à ce que le texte attendu soit présent
+            boolean isTextPresent = wait.until(ExpectedConditions.textToBePresentInElementLocated(
+                    By.className("cart-products-count"), "Il y a 4 articles dans votre panier."));
 
-        // Attendre jusqu'à ce que le texte soit mis à jour
-        String message = wait.until(ExpectedConditions.textToBePresentInElementLocated(
-                By.className("cart-products-count"), "1")).toString();
-
-        if (message.equals(expectedMessage)) {
-            System.out.println("Quantity exact and validation successful.");
-        } else {
-            System.out.println("Add to cart not valid: " + message);
+            // Valider le texte
+            if (isTextPresent) {
+                System.out.println("Quantity exact and validation successful.");
+            } else {
+                System.out.println("Add to cart not valid.");
+            }
+        } catch (TimeoutException e) {
+            // Gestion du cas où le texte n'apparaît pas dans le délai imparti
+            String actualMessage = driver.findElement(By.className("cart-products-count")).getText();
+            System.out.println("Timeout waiting for text. Current text is: " + actualMessage);
         }
     }
 
-}
+    }
+

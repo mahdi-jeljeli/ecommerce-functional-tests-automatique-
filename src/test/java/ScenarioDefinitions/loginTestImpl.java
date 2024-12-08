@@ -17,8 +17,8 @@ public class loginTestImpl {
 
     @When("user enters username and password")
     public void user_enters_username_and_password() {
-        driver.findElement(By.id("field-email")).sendKeys("mail@gmail.com.com");
-        driver.findElement(By.id("field-password")).sendKeys("Ma14d");
+        driver.findElement(By.id("field-email")).sendKeys("mahdijeljli1@gmail.com");
+        driver.findElement(By.id("field-password")).sendKeys("Mahdi123##");
     }
 
     @And("Clicks on login Button")
